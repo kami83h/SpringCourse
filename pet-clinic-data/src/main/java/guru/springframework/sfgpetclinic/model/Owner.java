@@ -6,7 +6,11 @@ import javax.persistence.*;
 import java.util.HashSet;
 import java.util.Set;
 
-@Data
+/**
+ * Created by jt on 7/13/18.
+ */
+@Setter
+@Getter
 @NoArgsConstructor
 @Entity
 @Table(name = "owners")
@@ -33,5 +37,6 @@ public class Owner extends Person {
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "owner")
     private Set<Pet> pets = new HashSet<>();
+
 
 }

@@ -12,8 +12,14 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 
+import java.util.HashSet;
+import java.util.Optional;
+import java.util.Set;
+
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 /**
@@ -32,39 +38,68 @@ class OwnerSDJpaServiceTest {
     @Mock
     PetTypeRepository petTypeRepository;
 
-    @InjectMocks/* vid tarbort blir nullpointexception, den har @Service anotation*/
+    @InjectMocks/* vid tar bort blir nullpointexception, den har @Service annotation*/
     OwnerSDJpaService service;
+
+    Owner owner;
 
     @BeforeEach
     void setUp() {
+        owner = Owner.builder().id(1L).lastName(LAST_NAME).build();
     }
 
     @Test
     void findByLastName() {
         Owner owner = Owner.builder().id(1L).lastName(LAST_NAME).build();
-
         when(ownerRepository.findByLastName(any())).thenReturn(owner);
-
-        assertEquals("Smith", service.findByLastName("Smith").getLastName());
+        assertEquals(LAST_NAME, service.findByLastName(LAST_NAME).getLastName());
+        verify(ownerRepository).findByLastName(any());
     }
 
     @Test
     void findAll() {
+        Set<Owner> returnOwner = new HashSet<>();
+        returnOwner.add(Owner.builder().id(1L).build());
+        returnOwner.add(Owner.builder().id(2L).build());
+
+        when(ownerRepository.findAll()).thenReturn(returnOwner);
+
+        Set<Owner> owners = service.findAll();
+
+        assertNotNull(owners);
+        assertEquals(2,owners.size());
     }
 
     @Test
     void findById() {
+        when(ownerRepository.findById(anyLong())).thenReturn(Optional.of(owner));
+        Owner owner = service.findById(1L);
+        assertNotNull(owner);
+    }
+    @Test
+    void findByIdNotFound() {
+        when(ownerRepository.findById(anyLong())).thenReturn(Optional.empty());
+        Owner owner = service.findById(1L);
+        assertNull(owner);
     }
 
     @Test
     void save() {
+        Owner owner = Owner.builder().id(1L).build();
+        when(ownerRepository.save(any())).thenReturn(owner);
+        assertNotNull(service.save(owner));
+        verify(ownerRepository).save(any());
     }
 
     @Test
     void delete() {
+        service.delete(owner);
+        verify(ownerRepository).delete(any());
     }
 
     @Test
     void deleteById() {
+        service.deleteById(1L);
+        verify(ownerRepository).deleteById(anyLong());
     }
 }
